@@ -1,0 +1,770 @@
+---
+title: "Google Data Analytics- Bellabeat Case Study with R"
+author: "Kadiri Oluwafadejimi Sarah"
+date: "2022-10-18"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+## Introduction
+
+Welcome to my Google Data Analytics Capstone project. I will be performing data analysis on a dataset. All this in a bid to answer key business questions for the Bellabeat Company. This task is backed by the following steps in data analysis process:
+Ask, Prepare, Process, Analyze, Share and Act.
+
+## Company Background
+
+Bellabeat is a high tech manufacturer of health-focused products for women. it was founded by Urska Sren and Sando Mur. it is a small successful company that has the potential of becoming a larger player in the global smart device market. It offers the following products; Bellabeat app, Leaf, Time, Spring and Bellabeat Membership. Collecting data on activity,sleep,stress and reproductive health makes it possible for Bellabeat to be able to empower women with the knowledge about their health and habits. Since it was founded in 2013, Bellabeat has grown rapidly and positioned itself as a tech-driven wellness company for women, with several offices opened around the world and growing number of online retailers in addition to its own e-commerce chanel on their website.
+
+## Scenario
+
+In this case study i will focus on Bellabeat products and analyze smart device usage data in order to gain insights into how consumers are already using their smart devices. This insight will be used to generate recommendations for improving their marketing strategy.
+
+## Business Task
+
+To gather insights on customer usage for Bellabeat smart devices and then use it to make high level recommendations for improving marketing strategy of Bellabeat products.
+
+## Ask 
+
+The Ask phase consist of asking questions that will provide better understanding of the data and the problem the data is supposed to solve. As such one might need to do more research by asking key questions like:
+
+1. What are some trends in smart device usage?
+2. How could these trends apply to Bellabeat customers?
+3. How could these trends help influence Bellabeat Marketing Strategy?
+
+Looking at these questions i have been able to make the following deductions
+
+a. The company needs to target their marketing efforts into the needs of their customer based on the analysis from the smart device usage.
+b. Recommendations based on the  trend insights should be made available as guide for the marketing strategy of the company.
+c. Also the key stakeholders Urska Sren and Sando Mur must be involved and work with the rest of Bellabeat marketing analytic team.
+
+## Prepare
+
+## Downloading the dataset
+The data used for this analysis is FitBit Fitness Tracker Data on Kaggle(CCO: Public Domain, dataset made available through Morbius. 
+ 
+ FitBit Fitness Tracker Data : https://www.kaggle.com/arashnic/fitbit.
+
+
+## About the data
+it is a data that explores smart device users daily habit. There are 18 datasets containing personal fitness tracker from thirty three fitbit users.These fitbit users consented to the submission of personal tracker data, including minute-level output for physical activity, heart rate, and sleep monitoring. Records on daily activity, daily steps, daily calories and daily intensities were documented and insights from this data can be used to access the impact of any of the Bellabeat products.
+Upon viewing the datasets i found that there are some cases of duplicate values and time stamp problems.
+Limitations for this data exist due to the sample size and absence of key characteristics of the participants, such as gender, age, location, lifestyle.
+For this analysis the datasets for daily activity, daily calories, daily intensities, daily steps, heartrate by seconds, minute METs, daily sleep, and weight log information, will be used.
+
+# Process
+
+R Studio will be used to perform this analysis as i find it more useful based on the volume of dataset, many packages, and data visualization features available to explore the data with.
+
+## Installing and loading of packages:
+I will Install some R packages that will help me in my analysis, add some data cleaning packages and visualization packages.
+
+```{r, echo = F}
+library(knitr)
+opts_chunk$set(tidy.opts=list(width.cutoff=20),tidy=TRUE)
+```
+
+
+```{r, eval=FALSE, echo=T}
+install.packages("tidyverse")
+install.packages("lubridate")
+install.packages("dplyr")
+install.packages("ggplot2")
+install.packages("tidyr")
+install.packages("here")
+install.packages("skimr")
+install.packages("janitor")
+install.packages("ggpubr")
+install.packages("scales")
+install.packages("reshape2")
+``` 
+
+I will also load my installed packages
+
+```{r}
+library("tidyverse")
+library("lubridate")
+library("dplyr")
+library("ggplot2")
+library("tidyr")
+library("here")
+library("skimr")
+library("janitor")
+library("ggpubr")
+library("scales")
+library("ggrepel")
+library("reshape2")
+```
+
+## Importing Dataset
+
+The csv files were first opened in Excel to examine the datasets. The files were then imported into R Studio and each dataset was assigned to a dataframe.
+
+```{r}
+daily_activity <- read_csv("dailyActivity_merged.csv")
+
+daily_calories <- read_csv("dailyCalories_merged.csv")
+
+daily_intensities <- read_csv("dailyIntensities_merged.csv")
+
+daily_steps <- read_csv("dailySteps_merged.csv")
+
+heart_rate_in_secs <- read_csv("heartrate_seconds_merged.csv")
+
+minutes_met <- read_csv("minuteMETSNarrow_merged.csv")
+
+sleep_record_day <- read_csv("sleepDay_merged.csv")
+
+weight_log <- read_csv("weightLogInfo_merged.csv")
+```
+
+## View Dataframes
+
+To ensure the data frames were imported correctly, the head() function is used to examine them. The colnames() and glimpse() functions were used to explore the data frames and find commonalities.
+
+### daily_activity
+
+```{r}
+head(daily_activity)
+colnames(daily_activity)
+glimpse(daily_activity)
+```
+
+### daily_calories
+```{r}
+head(daily_calories)
+colnames(daily_calories)
+glimpse(daily_calories)
+```
+
+### daily_intensities
+```{r}
+head(daily_intensities)
+colnames(daily_intensities)
+glimpse(daily_intensities)
+```
+
+### daily_steps
+```{r}
+head(daily_steps)
+colnames(daily_steps)
+glimpse(daily_steps)
+```
+
+### heart_rate_in_secs
+```{r}
+head(heart_rate_in_secs)
+colnames(heart_rate_in_secs)
+glimpse(heart_rate_in_secs)
+```
+
+### minutes_met
+```{r}
+head(minutes_met)
+colnames(minutes_met)
+glimpse(minutes_met)
+```
+
+### sleep_record_day
+```{r}
+head(sleep_record_day)
+colnames(sleep_record_day)
+glimpse(sleep_record_day)
+```
+
+### weight_log
+```{r}
+head(weight_log)
+colnames(weight_log)
+glimpse(weight_log)
+```
+
+## Data Cleaning
+
+Basic cleaning:
+Now, I’m going to Process, Clean and Organize the dataset for analysis. I used functions like glimpse(),to quickly review the data. I also clean the names of the data using clean_names().
+And here some cleaning steps I did with the data :
+• For Dataset (Activity, Calories and Intensities): For the data cleaning steps, I did not find data errors like Spelling errors, Misfield values, Missing values, Extra and blank space, and duplicates. Dates columns will be mutated to create date, time, weekday and month columns.
+• Used distinct() to remove duplicates from datasets.
+
+## Cleaning of Data frame name
+
+```{r}
+#Data Cleaning and Preparation using clean_name function
+
+daily_activity %>%
+  clean_names(case = "upper_camel")
+
+daily_calories %>%
+  clean_names(case = "upper_camel")
+
+daily_intensities %>%
+  clean_names(case = "upper_camel")
+
+daily_steps %>%
+  clean_names(case = "upper_camel")
+
+heart_rate_in_secs %>%
+  clean_names(case = "upper_camel")
+
+minutes_met %>%
+  clean_names(case = "upper_camel")
+
+sleep_record_day %>%
+  clean_names(case = "upper_camel")
+
+weight_log %>%
+  clean_names(case = "upper_camel")
+```
+
+
+### Performing Date Formatting
+
+Beacause of the nature of my analysis i will be breaking down the date column of daily_activity, heart_rate_in_secs, minutes_met, sleep_record_day and weight_log into date,time,weekday and month.
+
+```{r}
+# Mutate ActivtyDate data type to date / time and create new time, date, month, and weekday columns in df
+daily_activity$ActivityDate=as.POSIXct(daily_activity$ActivityDate, format="%m/%d/%Y", tz=Sys.timezone())
+daily_activity$date <- format(daily_activity$ActivityDate, format = "%m/%d/%y")
+daily_activity$month <- format(daily_activity$ActivityDate, format = "%B")
+daily_activity$day <- format(daily_activity$ActivityDate, format = "%d")
+daily_activity$weekday <- format(daily_activity$ActivityDate, format = "%A")
+```
+
+```{r}
+#Mutate Time data type to date / time and create new date,time and month columns in df
+heart_rate_in_secs$Time=as.POSIXct(heart_rate_in_secs$Time, format="%m/%d/%Y %I:%M:%S %p", tz=Sys.timezone())
+heart_rate_in_secs$date <- format(heart_rate_in_secs$Time, format = "%m/%d/%y")
+heart_rate_in_secs$time <- format(heart_rate_in_secs$Time, format="%H")
+heart_rate_in_secs$month <- format(heart_rate_in_secs$Time, format = "%B")
+```
+
+
+```{r}
+# Mutate ActivityMinute data type to date / time and create new time, date, month, and weekday columns in df
+minutes_met$ActivityMinute=as.POSIXct(minutes_met$ActivityMinute, format="%m/%d/%Y %I:%M:%S %p", tz=Sys.timezone())
+minutes_met$time <- format(minutes_met$ActivityMinute, format = "%H:%M:%S")
+minutes_met$date <- format(minutes_met$ActivityMinute, format = "%m/%d/%y")
+minutes_met$month <- format(minutes_met$ActivityMinute, format = "%B")
+minutes_met$day <- format(minutes_met$ActivityMinute, format = "%d")
+minutes_met$weekday <- format(minutes_met$ActivityMinute, format = "%A")
+head(minutes_met)
+```
+
+
+```{r}
+# Mutate SleepDay data type to date / time and create new date and month columns in df
+sleep_record_day$SleepDay=as.POSIXct(sleep_record_day$SleepDay, format="%m/%d/%Y %I:%M:%S %p", tz=Sys.timezone())
+sleep_record_day$date <- format(sleep_record_day$SleepDay, format = "%m/%d/%y")
+sleep_record_day$month <- format(sleep_record_day$SleepDay, format = "%B")
+head(sleep_record_day)
+```
+
+```{r}
+# Mutate Date data type to date / time and create new time, date, month, and weekday columns in df
+weight_log$Date=as.POSIXct(weight_log$Date, format="%m/%d/%Y %I:%M:%S %p", tz=Sys.timezone())
+weight_log$date <- format(weight_log$Date, format = "%m/%d/%y")
+weight_log$time <- format(weight_log$Date, format = "%H:%M:%S")
+weight_log$month <- format(weight_log$Date, format = "%B")
+```
+
+### Fixing Duplicate Values
+
+```{r}
+#Remove duplicate records
+heart_rate_in_secs %>% distinct()
+daily_activity %>% distinct()
+minutes_met %>% distinct()
+sleep_record_day %>% distinct()
+weight_log %>% distinct()
+```
+
+
+# Creating a Unified Dataframe
+
+One thing common to all eight of the imported dataframe is that they contain the "Id" column, so it is possible to merge all of them if need be. Also the The daily_activity data frame appears to contain data for calories, intensities, and steps. We will use the daily_activity data frame because it contains data for calories, intensities and steps and to ensure simplicity for our analysis.
+
+# Analyze
+
+## Summary of the Data
+
+The `n_distinct()` and `n_row()` functions will be used to determine the number of unique values and rows in the required data frames;
+
+```{r}
+#number of unique values for the five dataframes
+n_distinct(heart_rate_in_secs$Id)
+n_distinct(daily_activity$Id)
+n_distinct(minutes_met$Id)
+n_distinct(weight_log$Id)
+n_distinct(sleep_record_day$Id)
+```
+
+```{r}
+#number of rows for all five dataframe
+nrow(heart_rate_in_secs)
+nrow(daily_activity)
+nrow(minutes_met)
+nrow(weight_log)
+nrow(sleep_record_day)
+```
+
+Use the `summary()` function to pull key statistics about the dataframes.
+
+```{r}
+# Exploring the daily_activity dataframe
+daily_activity %>%
+  select(TotalSteps,
+         TotalDistance,SedentaryMinutes,LightlyActiveMinutes,
+         FairlyActiveMinutes,
+         VeryActiveMinutes,Calories) %>%
+  summary()
+```
+
+This summary shows the average user is taking 7638 steps a day,which is short of the recommended 10,000 steps for healthy living by the CDC. On average, users are getting 21.16 minutes of very active or vigorous activity a day, which equates to (21.16* 7) 148.12 minutes a week. The CDC recommends 75 minutes of vigorous activity a week, so the average Fitbit user is outperforming in this aspect. Also, participants are averaging 991.2 minutes, or (991.2/60) 16.52 hours of sedentary time a day. This way higher than the recommended hours which is 8 hours or less, and it can lead to other health issues like diabetes or heart diseases.  Furthermore, this summary shows the average user is burning 2304 calories a day when compared recommended 2000 calories per week. Studies have shown that burning 3500 calories in a week is needed to lose a pound of weight. The Fitbit users in this case are burning more than the norm, and are on track to lose a few pounds a week if they choose to.
+
+```{r}
+# Exploring the heart_rate_in_secs dataframe
+heart_rate_in_secs %>%
+  select(Value) %>%
+ summary()
+```
+
+Despite the low number of users in the heart rate data frame, the average heartrate of 77 beats per minute (bpm) fits within the “normal” range. The normal pulse for healthy adults ranges from 60 to 100 beats per minute. 
+
+```{r}
+# Exploring the minutes_met dataframe
+minutes_met %>%
+  select(METs) %>%
+  summary()
+```
+
+The summary of minute METs shows the average user has a METs of 14.69. MET stands for metabolic equivalent, which is one way that exercise physiologists estimate how many calories are burned during physical activity. 
+
+```{r}
+# Exploring the sleep_record_day dataframe
+sleep_record_day %>%
+  select(TotalSleepRecords, TotalMinutesAsleep, TotalTimeInBed) %>%
+  summary()
+```
+
+The summary of the sleep data frame displays the average user sleeps for 419.5 minutes, or roughly (419.5/60) 7 hours per day. This falls within the CDC’s recommended sleeping hours per day for adults 7 or more hours. The summary also showed that the average participant spends 458.6 minutes in bed, or 7.64 hours. This means the typical user is spending 39.1 minutes awake in bed. 
+
+```{r}
+# Exploring the weight_log dataframe
+weight_log %>%
+  select(WeightPounds, BMI) %>%
+  summary()
+```
+
+Body mass index (BMI) is a measure of body fat based on height and weight.From this data frame we can see that the average BMI is 25.19. This is considered an overweight BMI. 
+
+# Share
+
+The `ggplot()` function in R Studio will be used to create data visualizations that depict patterns and trends in the data frames. And also to communicate high level of insights and recommendations.
+
+# Count of Activity by Month
+```{r}
+#plot a chart showing the distribution of activities monthly.
+daily_activity %>% count(month, sort = TRUE) %>%
+  ggplot() + geom_col(aes(x=month, y=n)) +
+  labs(title = "Count of Activities by month", x="month", 
+       y="Number of Activities")
+```
+
+
+Figure 1: A chart showing the distribution of activities on each day of the week.
+
+Based on the Count of Activities by month chart above we can see an optimal burst in activities performed in April followed by a  decline in the number of activities in the month of May.This data shows that the company needs to work with engaging concepts and ideas that keep the customers glued to their fitness product.
+
+# Visual Representation Daily Steps Vs. Active Minutes
+
+```{r}
+#create new dataframe computing the Total Active Minutes 
+total_daily_activity <- daily_activity %>%
+  mutate(TotalActiveMinutes = VeryActiveMinutes+FairlyActiveMinutes+LightlyActiveMinutes)
+```
+
+```{r}
+# Plot relationship between number of daily steps and minutes active during the day
+dailysteps_vs_activeminutes <- ggplot(data=total_daily_activity, aes(x=TotalSteps, y=TotalActiveMinutes)) + 
+  geom_point(color="#40916c") + 
+  geom_smooth(method = 'loess', formula = y ~ x, span = 0.3) +
+  labs(title="Daily Active Minutes vs. Daily Total Steps", 
+       x="Total Daily Steps", y="Total Active Time (Minutes)")
+
+dailysteps_vs_activeminutes
+```
+
+Figure 2: The Relationship between Daily Active Minutes and Total Steps
+Figure 2 depicts a positive correlation between Total active minutes and total daily steps. This means that the participant spent enough time in activities that cause them to be mobile. 
+
+
+### Relationship between Very Active Minutes and the Total Calories Burned
+
+```{r}
+ggplot(data= daily_activity, aes(x=VeryActiveMinutes, y=Calories)) + geom_point() + 
+  stat_smooth(method='lm', formula = y ~ x, span = 0.3) + 
+labs(title="Very Active Minutes Vs. Total Daily Calories Burned")
+```
+
+Figure 3: 
+This chart depicts a positive correlation between very active minutes and total daily calories burned. This means that the more vigorous physical activity the participant did, the more calories they burned.
+
+## Relationship between Total Steps and Sedentary Minutes
+
+```{r}
+ggplot(data= daily_activity, 
+       aes(x=TotalSteps, y=SedentaryMinutes)) + geom_point() + geom_smooth() + 
+  labs(title="Total Steps vs. Sedentary Minutes")
+```
+
+Figure 4: 
+From this chart i can see that there is negative correlation between Steps and Sedentary time. This implies that the more time you spend in one spot the less Steps you are taking on a daily basis. This chart shows that the company need to market more to the customer segments with high Sedentary time. Preferable the 9-5res work geography.
+
+
+# Relationship between time spent in bed and sleep length
+```{r}
+# Plot relationship between time spent in bed and sleep length
+plot_sleep <- ggplot(data=sleep_record_day, aes(x=TotalMinutesAsleep, y=TotalTimeInBed)) + 
+  geom_point(color="#014f86") + stat_smooth(method=lm) +
+  labs(title="Time Asleep vs. Time In Bed", x="Sleep Length (Minutes)", y="Time In Bed (Minutes)")
+
+plot_sleep
+```
+
+Figure 5:It depicts a positive relationship between total minutes asleep and total time in bed. This means for most participant the time they spent in bed was mostly equivalent to the time spent asleep. 
+
+
+## Relationship between Heart Rate and Time of Day
+```{r}
+hourly_hr <- heart_rate_in_secs %>%
+  group_by(time) %>%
+  drop_na() %>%
+  summarise(mean_total_hr = mean(Value))
+head(hourly_hr)
+```
+
+```{r}
+bar_heart_rate <- ggplot(data=hourly_hr, 
+                         aes(x=time, y=mean_total_hr)) + 
+  geom_bar(stat = "identity", fill='deepskyblue4') +
+  theme(axis.text.x = element_text(angle = 90)) +
+  labs(title="Heart Rate by Time of Day", x="Time of Day (Hour)", y="Average Heart Rate (BPM)")
+bar_heart_rate
+```
+
+Figure 6: This chart depicts that the Heart rate of average participant is higher than 75(BPM) at 12:00 pm noon and 6:00pm in the evening, this may be because most people are usually on the move around this time for lunch break and returning from their place of work in the evening. Whereas the lowest Heart rate can be seen around 4:00am probably because most people are likely to be asleep.
+
+## Relationship between Average Metabolic Rate and Day of the Week
+```{r}
+# Create new df with the weekday name from the minutes met df
+weekday_metabolic_equivalent <- minutes_met %>%
+  group_by(weekday) %>%
+  drop_na() %>%
+  summarise(mean_total_METs = mean(METs))
+View(weekday_metabolic_equivalent)
+
+# Create vector for the weekdays
+weekday_metabolic_equivalent$weekday <-ordered(weekday_metabolic_equivalent$weekday, levels=c("Monday", "Tuesday", "Wednesday", "Thursday",
+                                                                      "Friday", "Saturday", "Sunday"))
+
+# Plot relationship between average metabolic rate and day of the week
+bar_metabolic_equivalent <- ggplot(data=weekday_metabolic_equivalent, aes(x=weekday, y=mean_total_METs)) + 
+  geom_bar(stat = "identity", fill='deepskyblue4') +
+  theme(axis.text.x = element_text(angle = 90)) +
+  labs(title="Metabolic equivalent by Week Day", x="Day of the Week", y="Average Metabolic Equivalent (MET)")
+
+bar_metabolic_equivalent
+
+```
+
+Figure 7: From this chart we can see that saturday has the highest average METs this might be because saturday is a weekend and not many people are on the move as it is generally a rest day. 
+
+
+## Average Hours Asleep Vs. Average Hours in Bed
+```{r}
+# Create new df to summarize the average hours asleep, average hours in bed, grouped by the Id, and na values dropped
+avg_sleep_record <- sleep_record_day %>%
+  group_by(Id) %>%
+  summarise (mean_hrs_asleep = mean(TotalMinutesAsleep)/60, 
+             mean_hrs_in_bed = mean(TotalTimeInBed)/60)
+head(avg_sleep_record)
+```
+
+Summary: From this dataframe we can see that each participant spent extra time in bed when compared to when they are asleep.  So to help users improve their sleep, the company should consider using mood apps that uplifts ones mood for the day.
+
+
+## Visual Representation of Types of Sleepers
+```{r}
+sleeper_type_df <- avg_sleep_record %>%
+  mutate(sleeper_type = case_when(
+    mean_hrs_asleep < 4 ~ "Unhealthy Sleeper",
+    mean_hrs_asleep >= 4 & mean_hrs_asleep < 6 ~ "Bad Sleeper", 
+    mean_hrs_asleep >= 6 & mean_hrs_asleep < 7 ~ "Normal Sleeper", 
+    mean_hrs_asleep >= 7 ~ "Good Sleeper"
+  ))
+View(sleeper_type_df)
+
+# Create new df showing the percentage of each type of sleeper
+percent_sleeper_type <- sleeper_type_df %>%
+  group_by(sleeper_type) %>%
+  summarise(total = n()) %>%
+  mutate(totals = sum(total)) %>%
+  group_by(sleeper_type) %>%
+  summarise(total_percent = scales::percent(total / totals))
+
+# Create vector for each type of sleeper
+percent_sleeper_type$sleeper_type <- factor(percent_sleeper_type$sleeper_type, levels = c("Good Sleeper", "Normal Sleeper", "Bad Sleeper", "Unhealthy Sleeper"))
+
+# Plot pie chart showing the percentage of sleeper type from the sleeper record day df. 
+sleeper_type_chart <- percent_sleeper_type %>%
+  ggplot(aes(x="",y=total_percent, fill=sleeper_type)) +
+  geom_bar(stat = "identity", width = 1)+
+  coord_polar("y", start=0)+
+  theme_minimal()+
+  theme(axis.title.x= element_blank(),
+        axis.title.y = element_blank(),
+        panel.border = element_blank(), 
+        panel.grid = element_blank(), 
+        axis.ticks = element_blank(),
+        axis.text.x = element_blank(),
+        plot.title = element_text(hjust = 0.5, size=14, face = "bold")) +
+  scale_fill_manual(values = c("#0075ab","#aa6fc5","#ff6583","#ffa600"),
+                    labels = c("Good Sleeper", "Normal Sleeper", "Bad Sleeper", "Unhealthy Sleeper")) +
+  geom_text(aes(label = total_percent), color="white",
+            position = position_stack(vjust = 0.5))+
+  labs(title="Distribution of Sleeper Type")
+sleeper_type_chart
+
+head(percent_sleeper_type)
+
+```
+
+
+Figure 8:From the pie chart we can see that half of the population of participant experience good sleep(50%), 21% are bad sleepers, 17% are normal sleepers and 12% Unhealthy Sleepers. More target marketing should be geared towards the class of Bad and Unhealthy Sleepers.
+
+
+## Dataframe for Average Weight and Average BMI
+```{r}
+# Merge daily activity and weight log by id and date, and save as new df
+
+weight_by_bmi <- merge(daily_activity, weight_log, by=c('Id', 'date'))
+weight_by_bmi <- weight_by_bmi %>% select(-c("IsManualReport","LogId","WeightKg","month.y"))
+glimpse(weight_by_bmi)
+
+# Create new df with average weight in pounds, average BMI, grouped by id, and na values dropped
+avg_weight_by_bmi <- weight_by_bmi %>%
+  group_by(Id) %>%
+  summarise (mean_weight = mean(WeightPounds), 
+             mean_bmi = mean(BMI))
+head(avg_weight_by_bmi)
+
+# find the mininum and maximum BMI based on the weight log df.
+max(weight_by_bmi$BMI)
+min(weight_by_bmi$BMI)
+```
+
+Summary: The maximum and minimum Body Mass Index(BMI) are 47.54 and 21.45 respectively with The ideal BMI being between 18.4 to 24.9.
+
+
+## Stats and Visual Representation of Weight Categories.
+```{r}
+# Create new df to classify weight type by BMI
+bmi_weight_category <- avg_weight_by_bmi %>%
+  mutate(bmi_weight = case_when(
+    mean_bmi < 18.5 ~ "Underweight",
+    mean_bmi >= 18.5 & mean_bmi < 24.9 ~ "Normal Weight", 
+    mean_bmi >= 25 & mean_bmi < 29.9 ~ "Overweight", 
+    mean_bmi >= 30 ~ "Obese"
+  ))
+
+head(bmi_weight_category)
+
+# Create new df to calculate percentage of each type of weight type
+percent_bmi_weight_category <- bmi_weight_category %>%
+  group_by(bmi_weight) %>%
+  summarise(total = n()) %>%
+  mutate(totals = sum(total)) %>%
+  group_by(bmi_weight) %>%
+  summarise(total_percent = scales::percent(total / totals))
+head(percent_bmi_weight_category)
+
+# Create vector for each weight type
+percent_bmi_weight_category$bmi_weight <- factor(percent_bmi_weight_category$bmi_weight , levels = c("Obese", "Overweight", "Normal Weight", "Underweight"))
+
+# Plot pie chart of percentage distribution of weight type
+bmi_chart <- percent_bmi_weight_category %>%
+  ggplot(aes(x="",y=total_percent, fill=bmi_weight)) +
+  geom_bar(stat = "identity", width = 1)+
+  coord_polar("y", start=0)+
+  theme_minimal()+
+  theme(axis.title.x= element_blank(),
+        axis.title.y = element_blank(),
+        panel.border = element_blank(), 
+        panel.grid = element_blank(), 
+        axis.ticks = element_blank(),
+        axis.text.x = element_blank(),
+        plot.title = element_text(hjust = 0.5, size=14, face = "bold")) +
+  scale_fill_manual(values = c("#8173bd","#ffa600","#009d9f"),
+                    labels = c("Obese", "Overweight", "Normal Weight", "Underweight")) +
+  geom_text(aes(label = total_percent),color="white",
+            position = position_stack(vjust = 0.5))+
+  labs(title="Distribution of Weight Type")
+bmi_chart
+```
+
+Figure 10: This chart shows that 50% of the participant fall under the Overweight body type, 38% normal weight and 12% fall under the obese section. Intense marketing of products that align with the health needs of the over weight and obese category should be implemented.
+
+## Classification of Wearable Tracker into User Types
+
+```{r}
+# Merge daily activity and sleep record day data by id and date, and save as new df
+activity_sleep_data <- merge(daily_activity, sleep_record_day, 
+                             by=c ("Id", "date"))
+activity_sleep_data <- activity_sleep_data %>% select(-c("month.y"))
+glimpse(activity_sleep_data)
+
+# Create new df to classify wearable tracker into different user type
+daily_tracker_user_type <- activity_sleep_data %>%
+  group_by(Id) %>%
+  summarize(days_used=sum(n())) %>%
+  mutate(tracker_usage = case_when(
+    days_used < 11 ~ "Light Use",
+    days_used >= 11 & days_used <= 20 ~ "Moderate Use", 
+    days_used >= 21 & days_used <= 31 ~ "High Use", 
+  )) %>%
+  drop_na()
+
+head(daily_tracker_user_type)
+```
+
+Summary: Highest record for tracker usage is 28 days with the lowest being 1 day.
+
+# Visual Representation of Tracker Usage.
+```{r}
+# Create new df to calculate the percentage of wearable tracker usage
+percent_of_daily_tracker_use <- daily_tracker_user_type %>%
+  group_by(tracker_usage) %>%
+  summarise(total = n()) %>%
+  mutate(totals = sum(total)) %>%
+  group_by(tracker_usage) %>%
+  summarise(total_percent = scales::percent(total / totals))
+head(percent_of_daily_tracker_use)
+
+# Create vector for each wearable tracker user type
+percent_of_daily_tracker_use$tracker_usage <- factor(percent_of_daily_tracker_use$tracker_usage , 
+          levels = c("High Use", "Moderate Use", "Light Use"))
+
+# Create vector for each wearable tracker user type
+percent_of_daily_tracker_use$tracker_usage <- factor(percent_of_daily_tracker_use$tracker_usage , 
+  levels = c("High Use", "Moderate Use", "Light Use"))
+
+# Plot bar chart of percentage distribution of wearable tracker based on their user types
+daily_tracker_chart <- percent_of_daily_tracker_use %>%
+  ggplot(aes(x="",y=total_percent, fill=tracker_usage)) +
+  geom_bar(stat = "identity", width = 1)+
+  coord_polar("y", start=0)+
+  theme_minimal()+
+  theme(axis.title.x= element_blank(),
+        axis.title.y = element_blank(),
+        panel.border = element_blank(), 
+        panel.grid = element_blank(), 
+        axis.ticks = element_blank(),
+        axis.text.x = element_blank(),
+        plot.title = element_text(hjust = 0.5, size=14, face = "bold")) +
+  scale_fill_manual(values = c("#2a9d8f","#e9c46a","#e76f51"),
+                    labels = c("High Use", "Moderate Use", "Light Use")) +
+  geom_text(aes(label = total_percent),color="white",
+            position = position_stack(vjust = 0.5))+
+  labs(title="Distribution of Tracker User Types ")
+
+daily_tracker_chart
+
+```
+
+Figure 10: Based on this chart about 48% of the entire population of participant used the trackers very well, 39% used it moderately and 13% used it lightly. The marketing team needs to shed more enlightenment to the customers about the health benefits of keeping the trackers on as this is needed to track the progress of their wellness journey.
+
+
+# Act
+
+Bellabeat has empowered women by providing data on their activity, sleep, stress, hydration levels, and reproductive health. By analyzing how Fitbit consumers use and respond to its own app features, recommendations can be made to marketing team that will promote further growth of Bellabeat company.
+
+## General Recommendations:
+
+### Bellabeat App
+
+The Bellabeat app provides users with health data related to their activity, sleep, stress,menstrual cycle, and mindfulness habits. This data can help users better understand their current habits and make healthy decisions. The Bellabeat app connects to their line of smart wellness products.
+
+#### Recommendations
+
+1. Bellabeat App should be revamped such that it is engaging and stimulating so that customers do not loose interest in using the app after a while.
+
+2. There should be massive social media campaign about the app, with creation of online communities where people can show off their progress and discuss issues affecting the progress of their wellness journey.
+
+3.Creation of weekly fitness challenges with reward systems like coupons,free airline tickets to choicest holiday destinations among others to encourage users.
+
+4. The app should have paid advertisements from health organizations and fitness companies in other to improve company revenue.
+
+5. The app should also include features that enable users monitor their Body Mass Index like a BMI calculator.
+
+6. The app can also include features that promote happiness and productivity in the morning so that people do not remain long in bed after waking up from sleep. And this feature should include an alert system that is automated upon waking up from sleep.
+
+### Leaf
+It is a classic wellness tracker that can be worn as a bracelet, necklace, or clip. The Leaf tracker connects to the Bellabeat app to track activity, sleep, and stress.
+
+1. The tracker can also be revamped to include alert notifications that;
+
+* Encourage users to meet the mandated 10,000 steps per day.
+* Enable and encourage users to meet the mandated 7 hour sleep period.
+* Alert notifications for when the heart rate deviates significantly from  the normal.
+* Alert notifications that prompt users to do the recommended 75 minutes of vigorous activity per week.
+
+2. Marketing team should focus on encouraging users to wear the tracker more, as it is important in monitoring their health and wellness.
+
+3. There should also be badges allocated weekly to users with good tracker records.
+
+### Time 
+
+This wellness watch combines the timeless look of a classic timepiece with smart technology to track user activity, sleep, and stress.
+
+#### Recommendations;
+
+These products should be highly marketed to the working class community as 
+its tracking features will be more beneficial to them. Also the marketing team can partner with health care institutions like hospitals, trauma centers, and clinics among others to promote this product.
+
+### Bellabeat Membership
+
+Bellabeat also offers a subscription-based membership program for users.
+Membership gives users 24/7 access to fully personalized guidance on nutrition, activity, sleep, health and beauty, and mindfulness based on their lifestyle. 
+
+#### Recommendations;
+
+1. Offer 30-day free trial subscription.
+2. Offer reduced subscription fee when a member refers a friend or family.
+3. Offer discounts for Bellabeat smart device products for registered members.
+4. Offer family package subscription at reduced fee.
+5. Partner with companies and offer discount fees for its employee that will register as members.
+
+### Recommendations for Bellabeat Spring Products
+
+1. Heavily market Spring as Fitbit does not have product that track hydration levels.
+2. Offer a bundle deal for the Spring and Time together. And this offer should be geared towards health and fitness facilities.
+
+# Works Cited:
+
+1. "How Many Calories Should You Burn Daily to Lose Weight?", CNET, Mercey Livingston, 1 Jul.2022, 
+https://www.cnet.com/health/fitness/weight-loss-how-many-calories-should-you-burn-each-day/
+
+2. "Vital Signs (Body Temperature, Pulse Rate, Respiration Rate, Blood Pressure)", John Hopkins Medicine, 2022, https://www.hopkinsmedicine.org/health/conditions-and-diseases/vital-signs-body-temperature-pulse-rate-respiration-rate-blood-pressure
+
+3. "Sedentary Behaviour for Adults", KFL&A Public Health, 2020,
+https://www.kflaph.ca/en/healthy-living/sedentary-behaviour-for-adults.aspx
+
+4. "Aim for a healthy Weight", National Heart, Lung. and Blood Institute,
+https://www.nhlbi.nih.gov/health/educational/lose_wt/BMI/bmicalc.htm
+
+5. "5 Things to Know About Metabolic Equivalents", ACE Fitness, Pete McCall, 23 May 2017, https://www.acefitness.org/resources/pros/expert-articles/6434/5-things-to-know-about-metabolic-equivalents/ 
+
+6. “CDC — How Much Sleep Do I Need? — Sleep and Sleep Disorders.” Centers for Disease Control and Prevention, Centers for Disease Control and Prevention, 2 Mar. 2017, www.cdc.gov/sleep/about_sleep/how_much_sleep.html
+
+7. "Bellabeat Case Study", Nicholas Mirante , 2021, https://nicholasmirante.com/data-analysis-portfolio
